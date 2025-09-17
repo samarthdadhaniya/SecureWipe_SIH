@@ -5,13 +5,11 @@ import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Navigation } from "@/components/navigation"
 import { PageHeader } from "@/components/page-header"
 import {
   CheckCircle,
   Download,
   FileText,
-  Code,
   QrCode,
   Shield,
   Clock,
@@ -19,6 +17,7 @@ import {
   Copy,
   Check,
   Home,
+  Award,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -26,17 +25,17 @@ import Link from "next/link"
 const completionData = {
   device: {
     name: "Primary System Drive",
-    model: "Samsung SSD 980 PRO",
-    capacity: "1TB",
-    serialNumber: "S6XNNU0R123456",
+    model: "ST3500312CS",
+    capacity: "500 GB",
+    serialNumber: "XXXXXXXXXXXXXXX",
   },
   wipe: {
-    method: "DoD 5220.22-M (3-pass)",
-    startTime: "2024-01-15T10:30:00Z",
-    endTime: "2024-01-15T13:45:00Z",
-    duration: "3h 15m",
-    passes: 3,
-    bytesProcessed: "1,000,000,000,000",
+    method: "PRNG Stream",
+    startTime: "2023-11-01T20:48:21Z",
+    endTime: "2023-11-02T03:15:45Z",
+    duration: "06:27:24",
+    passes: 1,
+    bytesProcessed: "500,107,862,016",
     verificationCode: "WP-2024-0115-A7B9C2D4E6F8",
     certificateId: "CERT-SW-20240115-001",
   },
@@ -54,226 +53,246 @@ export default function WipeCompletePage() {
   }
 
   const handleDownloadPDF = () => {
-    // In a real app, this would generate and download a PDF report
-    console.log("Downloading PDF report...")
-  }
-
-  const handleDownloadJSON = () => {
-    // In a real app, this would generate and download a JSON report
-    const jsonData = {
-      certificate: completionData,
-      timestamp: new Date().toISOString(),
-      signature: "SHA256:a1b2c3d4e5f6...",
-    }
-    const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `wipe-report-${completionData.wipe.certificateId}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    // Create a link to download the PDF from the public folder
+    const link = document.createElement("a")
+    link.href = "/report.pdf"
+    link.download = `disk-erasure-report-${completionData.wipe.certificateId}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="container px-4 py-8 lg:py-12 ml-0 pt-8">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader
+          title="Secure Wipe Completed Successfully"
+          description="Your device has been securely wiped according to industry standards. Download your compliance certificate below."
+        />
 
-      <main className="container px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <PageHeader
-            title="Wipe Completed Successfully"
-            description="Your device has been securely wiped. Download your compliance certificate and verification report."
-          />
-
-          {/* Success Banner */}
-          <Card className="mb-6 border-2 border-success/20 bg-success/5">
-            <CardContent className="flex items-center gap-4 pt-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/20">
-                <CheckCircle className="h-6 w-6 text-success" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-success">Secure Wipe Completed</h3>
-                <p className="text-sm text-muted-foreground">
-                  All data has been permanently erased and verified according to industry standards.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Device & Wipe Details */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <HardDrive className="h-5 w-5" />
-                    Device Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Device Name</span>
-                    <span className="font-medium">{completionData.device.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Model</span>
-                    <span className="font-medium">{completionData.device.model}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Capacity</span>
-                    <span className="font-medium">{completionData.device.capacity}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Serial Number</span>
-                    <span className="font-mono text-sm">{completionData.device.serialNumber}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Wipe Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Method</span>
-                    <span className="font-medium">{completionData.wipe.method}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Passes</span>
-                    <span className="font-medium">{completionData.wipe.passes}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Duration</span>
-                    <span className="font-medium">{completionData.wipe.duration}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Data Processed</span>
-                    <span className="font-medium">{completionData.wipe.bytesProcessed} bytes</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Start Time</span>
-                    <span className="font-mono text-sm">
-                      {new Date(completionData.wipe.startTime).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">End Time</span>
-                    <span className="font-mono text-sm">{new Date(completionData.wipe.endTime).toLocaleString()}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5" />
-                    Compliance Standards
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {completionData.compliance.map((standard) => (
-                      <Badge key={standard} variant="outline" className="bg-success/10 border-success/20">
-                        {standard}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+        <Card className="mb-10 border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 shadow-xl">
+          <CardContent className="flex items-center gap-8 pt-8 pb-8">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 border-4 border-emerald-200 shadow-lg">
+              <CheckCircle className="h-10 w-10 text-emerald-600" />
             </div>
+            <div className="flex-1">
+              <h3 className="text-3xl font-bold text-emerald-800 mb-3">Data Permanently Erased</h3>
+              <p className="text-lg text-emerald-700 leading-relaxed">
+                All data has been securely wiped using industry-standard methods. Your compliance certificate is ready
+                for download.
+              </p>
+            </div>
+            <div className="text-right bg-white/60 rounded-xl p-4 border border-emerald-200">
+              <p className="text-sm text-emerald-600 font-medium mb-1">Certificate ID</p>
+              <code className="text-xl font-mono font-bold text-emerald-800">{completionData.wipe.certificateId}</code>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Certificate & Downloads */}
-            <div className="space-y-6">
-              <Card className="border-2 border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <QrCode className="h-5 w-5" />
-                    Verification Code
-                  </CardTitle>
-                  <CardDescription>Use this code to verify the authenticity of this wipe operation</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border">
-                    <code className="flex-1 font-mono text-sm">{completionData.wipe.verificationCode}</code>
-                    <Button size="sm" variant="ghost" onClick={handleCopyCode}>
-                      {copiedCode ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
+        <div className="grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl text-slate-800">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <HardDrive className="h-6 w-6 text-blue-600" />
                   </div>
+                  Device Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Device Name</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.device.name}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Model</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.device.model}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Capacity</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.device.capacity}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Serial Number</span>
+                    <p className="font-mono text-base text-slate-800">{completionData.device.serialNumber}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                  {/* QR Code placeholder */}
-                  <div className="flex justify-center">
-                    <div className="w-32 h-32 bg-muted/50 rounded-lg border-2 border-dashed flex items-center justify-center">
-                      <QrCode className="h-8 w-8 text-muted-foreground" />
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl text-slate-800">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Shield className="h-6 w-6 text-purple-600" />
+                  </div>
+                  Erasure Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Method</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.wipe.method}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Duration</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.wipe.duration}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Bytes Processed</span>
+                    <p className="text-lg font-semibold text-slate-800">{completionData.wipe.bytesProcessed}</p>
+                  </div>
+                  <div className="space-y-2 p-4 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-500 uppercase tracking-wide">Status</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                      <p className="text-lg font-semibold text-emerald-600">ERASED</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="h-5 w-5" />
-                    Download Reports
-                  </CardTitle>
-                  <CardDescription>Download detailed compliance reports in multiple formats</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button onClick={handleDownloadPDF} className="w-full justify-start bg-transparent" variant="outline">
-                    <FileText className="mr-2 h-4 w-4" />
-                    Download PDF Report
-                  </Button>
-                  <Button
-                    onClick={handleDownloadJSON}
-                    className="w-full justify-start bg-transparent"
-                    variant="outline"
-                  >
-                    <Code className="mr-2 h-4 w-4" />
-                    Download JSON Report
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="border-2 border-primary/20 bg-primary/5">
-                <CardHeader>
-                  <CardTitle>Certificate ID</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <code className="text-sm font-mono">{completionData.wipe.certificateId}</code>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    This certificate ID can be used for audit trails and compliance verification.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl text-slate-800">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Award className="h-6 w-6 text-green-600" />
+                  </div>
+                  Compliance Standards
+                </CardTitle>
+                <CardDescription className="text-base">
+                  This erasure operation meets the following industry standards
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-4">
+                  {completionData.compliance.map((standard) => (
+                    <Badge
+                      key={standard}
+                      variant="outline"
+                      className="bg-green-50 border-green-200 text-green-700 px-4 py-2 text-sm font-medium"
+                    >
+                      <Award className="w-4 h-4 mr-2" />
+                      {standard}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t">
-            <Button asChild size="lg" className="flex-1">
-              <Link href="/">
-                <Home className="mr-2 h-4 w-4" />
-                Return to Home
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="flex-1 bg-transparent">
-              <Link href="/devices">
-                <HardDrive className="mr-2 h-4 w-4" />
-                Wipe Another Device
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="flex-1 bg-transparent">
-              <Link href="/history">
-                <Clock className="mr-2 h-4 w-4" />
-                View History
-              </Link>
-            </Button>
+          <div className="space-y-8">
+            <Card className="border-2 border-blue-200 shadow-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <QrCode className="h-6 w-6 text-blue-600" />
+                  Verification Code
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Use this code to verify the authenticity of this operation
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-blue-200">
+                  <code className="flex-1 font-mono text-sm break-all text-slate-800">
+                    {completionData.wipe.verificationCode}
+                  </code>
+                  <Button size="sm" variant="ghost" onClick={handleCopyCode} className="hover:bg-blue-100">
+                    {copiedCode ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-blue-600" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* QR Code placeholder */}
+                <div className="flex justify-center">
+                  <div className="w-48 h-48 bg-white rounded-xl border-2 border-dashed border-blue-300 flex items-center justify-center shadow-inner">
+                    <QrCode className="h-16 w-16 text-blue-400" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-xl border-0 bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <Download className="h-6 w-6 text-slate-700" />
+                  Download Report
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Download your professional compliance certificate
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={handleDownloadPDF}
+                  className="w-full justify-start h-16 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+                  size="lg"
+                >
+                  <FileText className="mr-4 h-6 w-6" />
+                  <div className="text-left">
+                    <div className="text-lg font-semibold">Download PDF Report</div>
+                    <div className="text-sm text-blue-100">Professional compliance certificate</div>
+                  </div>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Certificate ID Card */}
+            <Card className="border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50 shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-lg">Certificate Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-3 bg-white rounded-lg border">
+                  <p className="text-sm font-medium text-slate-500 mb-2">Certificate ID</p>
+                  <code className="text-base font-mono font-bold text-slate-800">
+                    {completionData.wipe.certificateId}
+                  </code>
+                </div>
+                <div className="p-3 bg-white rounded-lg border">
+                  <p className="text-sm font-medium text-slate-500 mb-2">Verification Code</p>
+                  <code className="text-sm font-mono text-slate-700">{completionData.wipe.verificationCode}</code>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  These identifiers can be used for audit trails and compliance verification.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </main>
+
+        <div className="flex flex-col sm:flex-row gap-6 mt-16 pt-10 border-t border-slate-200">
+          <Button
+            asChild
+            size="lg"
+            className="flex-1 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            <Link href="/">
+              <Home className="mr-3 h-5 w-5" />
+              Return to Home
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="flex-1 h-14 border-2 hover:bg-slate-50 bg-transparent">
+            <Link href="/devices">
+              <HardDrive className="mr-3 h-5 w-5" />
+              Wipe Another Device
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="flex-1 h-14 border-2 hover:bg-slate-50 bg-transparent">
+            <Link href="/history">
+              <Clock className="mr-3 h-5 w-5" />
+              View History
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

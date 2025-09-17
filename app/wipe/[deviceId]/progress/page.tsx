@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Navigation } from "@/components/navigation"
 import { PageHeader } from "@/components/page-header"
 import { HardDrive, Clock, Activity, CheckCircle, AlertTriangle, Pause, Play, Square } from "lucide-react"
 
@@ -79,7 +78,7 @@ export default function WipeProgressPage() {
     phaseProgress: 0,
     startTime: new Date(),
     elapsedTime: 0,
-    estimatedTimeLeft: 7200, // 2 hours
+    estimatedTimeLeft: Math.floor(Math.random() * 50) + 10, // 10-60 seconds
     bytesProcessed: 0,
     totalBytes: 1000000000000, // 1TB
     currentSpeed: 0,
@@ -103,7 +102,7 @@ export default function WipeProgressPage() {
           let newProgress = { ...prev, elapsedTime: newElapsedTime }
 
           // Simulate progress
-          if (prev.phase === "initializing" && prev.elapsedTime > 5) {
+          if (prev.phase === "initializing" && prev.elapsedTime > Math.floor(Math.random() * 6) + 2) {
             newProgress = {
               ...newProgress,
               phase: "wiping",
@@ -119,7 +118,7 @@ export default function WipeProgressPage() {
               },
             ])
           } else if (prev.phase === "wiping") {
-            const progressIncrement = 0.5 // Adjust speed as needed
+            const progressIncrement = 12 // Much faster progress to complete within 1 minute
             const newPhaseProgress = Math.min(prev.phaseProgress + progressIncrement, 100)
             const newOverallProgress = ((prev.currentPass - 1) * 100 + newPhaseProgress) / prev.totalPasses
 
@@ -176,7 +175,7 @@ export default function WipeProgressPage() {
               ])
             }
           } else if (prev.phase === "verifying") {
-            const newPhaseProgress = Math.min(prev.phaseProgress + 2, 100)
+            const newPhaseProgress = Math.min(prev.phaseProgress + 15, 100)
             newProgress = {
               ...newProgress,
               phaseProgress: newPhaseProgress,
@@ -239,6 +238,27 @@ export default function WipeProgressPage() {
   }
 
   const handleComplete = () => {
+    const scanData = {
+      id: `scan-${Date.now()}`,
+      deviceName: mockDevice.name,
+      deviceModel: mockDevice.model,
+      deviceType: mockDevice.type,
+      capacity: mockDevice.capacity,
+      serialNumber: mockDevice.serialNumber,
+      method: "DoD 5220.22-M (3-pass)",
+      status: "completed" as const,
+      startTime: progress.startTime.toISOString(),
+      endTime: new Date().toISOString(),
+      duration: formatTime(progress.elapsedTime),
+      certificateId: `CERT-${Date.now().toString(36).toUpperCase()}`,
+      verificationCode: `VER-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
+      compliance: ["DoD 5220.22-M", "NIST SP 800-88", "ISO 27001"],
+    }
+
+    const existingHistory = JSON.parse(localStorage.getItem("wipeHistory") || "[]")
+    existingHistory.unshift(scanData)
+    localStorage.setItem("wipeHistory", JSON.stringify(existingHistory))
+
     router.push(`/wipe/${params.deviceId}/complete`)
   }
 
@@ -273,189 +293,188 @@ export default function WipeProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen w-full max-w-none ml-0">
+      <div className="container px-4 py-8 lg:py-12 max-w-7xl mx-auto">
+        <PageHeader
+          title="Secure Wipe in Progress"
+          description="Monitor the real-time progress of your secure data wiping operation."
+        />
 
-      <main className="container px-4 py-8">
-        <div className="mx-auto max-w-4xl">
-          <PageHeader
-            title="Secure Wipe in Progress"
-            description="Monitor the real-time progress of your secure data wiping operation."
-          />
-
-          {/* Device Info */}
-          <Card className="mb-6 border-2">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <HardDrive className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg">{mockDevice.name}</CardTitle>
-                  <CardDescription>
-                    {mockDevice.model} • {mockDevice.capacity}
-                  </CardDescription>
-                </div>
-                <Badge
-                  variant={
-                    progress.phase === "completed"
-                      ? "default"
-                      : progress.phase === "error"
-                        ? "destructive"
-                        : "secondary"
-                  }
-                  className="ml-auto"
-                >
-                  {progress.phase === "completed" && <CheckCircle className="mr-1 h-3 w-3" />}
-                  {progress.phase === "error" && <AlertTriangle className="mr-1 h-3 w-3" />}
-                  {progress.phase.charAt(0).toUpperCase() + progress.phase.slice(1)}
-                </Badge>
+        <Card className="mb-8 border-0 shadow-xl bg-gradient-to-br from-white to-slate-50">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 border-2 border-blue-200">
+                <HardDrive className="h-7 w-7 text-blue-600" />
               </div>
-            </CardHeader>
-          </Card>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Progress Section */}
-            <div className="space-y-6">
-              {/* Overall Progress */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Overall Progress
-                  </CardTitle>
-                  <CardDescription>{getPhaseDescription()}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span className="font-mono">{progress.overallProgress.toFixed(1)}%</span>
-                    </div>
-                    <Progress value={progress.overallProgress} className="h-3" />
-                  </div>
-
-                  {progress.phase === "wiping" && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>
-                          Current Pass ({progress.currentPass}/{progress.totalPasses})
-                        </span>
-                        <span className="font-mono">{progress.phaseProgress.toFixed(1)}%</span>
-                      </div>
-                      <Progress value={progress.phaseProgress} className="h-2" />
-                    </div>
-                  )}
-
-                  {progress.phase === "verifying" && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Verification</span>
-                        <span className="font-mono">{progress.phaseProgress.toFixed(1)}%</span>
-                      </div>
-                      <Progress value={progress.phaseProgress} className="h-2" />
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Statistics */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Statistics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Elapsed Time</p>
-                      <p className="font-mono text-lg">{formatTime(progress.elapsedTime)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Time Remaining</p>
-                      <p className="font-mono text-lg">{formatTime(progress.estimatedTimeLeft)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Data Processed</p>
-                      <p className="font-mono">{formatBytes(progress.bytesProcessed)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Current Speed</p>
-                      <p className="font-mono">{formatBytes(progress.currentSpeed)}/s</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Controls */}
-              {progress.phase !== "completed" && progress.phase !== "error" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Controls</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2">
-                      <Button onClick={handlePause} variant="outline" className="flex-1 bg-transparent">
-                        {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
-                        {isPaused ? "Resume" : "Pause"}
-                      </Button>
-                      <Button onClick={handleStop} variant="destructive" className="flex-1">
-                        <Square className="mr-2 h-4 w-4" />
-                        Stop
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Completion Actions */}
-              {progress.phase === "completed" && (
-                <Card className="border-2 border-success/20 bg-success/5">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-success">
-                      <CheckCircle className="h-5 w-5" />
-                      Wipe Completed Successfully
-                    </CardTitle>
-                    <CardDescription>
-                      Your device has been securely wiped and is ready for disposal or reuse.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button onClick={handleComplete} className="w-full" size="lg">
-                      View Certificate & Report
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
+              <div className="flex-1">
+                <CardTitle className="text-2xl text-slate-800">{mockDevice.name}</CardTitle>
+                <CardDescription className="text-base text-slate-600">
+                  {mockDevice.model} • {mockDevice.capacity} • S/N: {mockDevice.serialNumber}
+                </CardDescription>
+              </div>
+              <Badge
+                variant={
+                  progress.phase === "completed" ? "default" : progress.phase === "error" ? "destructive" : "secondary"
+                }
+                className="text-sm px-4 py-2"
+              >
+                {progress.phase === "completed" && <CheckCircle className="mr-2 h-4 w-4" />}
+                {progress.phase === "error" && <AlertTriangle className="mr-2 h-4 w-4" />}
+                {progress.phase.charAt(0).toUpperCase() + progress.phase.slice(1)}
+              </Badge>
             </div>
+          </CardHeader>
+        </Card>
 
-            {/* Live Logs */}
-            <Card className="lg:row-span-3">
-              <CardHeader>
-                <CardTitle>Live Logs</CardTitle>
-                <CardDescription>Real-time activity log of the wiping process</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[400px] w-full">
-                  <div className="space-y-2">
-                    {logs.map((log, index) => (
-                      <div key={index} className="flex items-start gap-2 text-sm">
-                        <span className="text-xs text-muted-foreground font-mono mt-0.5">
-                          {new Date(log.timestamp).toLocaleTimeString()}
-                        </span>
-                        {getLogIcon(log.level)}
-                        <span className="flex-1">{log.message}</span>
-                      </div>
-                    ))}
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Progress Section */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50">
+              <CardHeader className="pb-6">
+                <CardTitle className="flex items-center gap-3 text-xl text-slate-800">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Activity className="h-6 w-6 text-green-600" />
                   </div>
-                </ScrollArea>
+                  Overall Progress
+                </CardTitle>
+                <CardDescription className="text-base text-slate-600">{getPhaseDescription()}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                <div className="space-y-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-slate-700">Progress</span>
+                    <span className="font-mono text-2xl font-bold text-slate-800">
+                      {progress.overallProgress.toFixed(1)}%
+                    </span>
+                  </div>
+                  <Progress value={progress.overallProgress} className="h-6" />
+                </div>
+
+                {progress.phase === "wiping" && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-slate-700">
+                        Current Pass ({progress.currentPass}/{progress.totalPasses})
+                      </span>
+                      <span className="font-mono text-lg text-slate-800">{progress.phaseProgress.toFixed(1)}%</span>
+                    </div>
+                    <Progress value={progress.phaseProgress} className="h-3" />
+                  </div>
+                )}
+
+                {progress.phase === "verifying" && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium text-slate-700">Verification</span>
+                      <span className="font-mono text-lg text-slate-800">{progress.phaseProgress.toFixed(1)}%</span>
+                    </div>
+                    <Progress value={progress.phaseProgress} className="h-3" />
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Statistics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Elapsed Time</p>
+                    <p className="font-mono text-2xl font-bold">{formatTime(progress.elapsedTime)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Time Remaining</p>
+                    <p className="font-mono text-2xl font-bold">{formatTime(progress.estimatedTimeLeft)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Data Processed</p>
+                    <p className="font-mono text-lg">{formatBytes(progress.bytesProcessed)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Current Speed</p>
+                    <p className="font-mono text-lg">{formatBytes(progress.currentSpeed)}/s</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Controls */}
+            {progress.phase !== "completed" && progress.phase !== "error" && (
+              <Card className="shadow-sm">
+                <CardHeader>
+                  <CardTitle>Controls</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex gap-3">
+                    <Button onClick={handlePause} variant="outline" className="flex-1 bg-transparent">
+                      {isPaused ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
+                      {isPaused ? "Resume" : "Pause"}
+                    </Button>
+                    <Button onClick={handleStop} variant="destructive" className="flex-1">
+                      <Square className="mr-2 h-4 w-4" />
+                      Stop
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Completion Actions */}
+            {progress.phase === "completed" && (
+              <Card className="border-2 border-emerald-200 shadow-xl bg-gradient-to-br from-emerald-50 to-green-50">
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-3 text-emerald-800">
+                    <CheckCircle className="h-6 w-6" />
+                    Wipe Completed Successfully
+                  </CardTitle>
+                  <CardDescription className="text-base text-emerald-700">
+                    Your device has been securely wiped and is ready for disposal or reuse.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    onClick={handleComplete}
+                    className="w-full h-14 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
+                    size="lg"
+                  >
+                    View Certificate & Report
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
+
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-xl text-slate-800">Live Logs</CardTitle>
+              <CardDescription className="text-base">Real-time activity log of the wiping process</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[600px] w-full">
+                <div className="space-y-3">
+                  {logs.map((log, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 text-sm p-3 rounded-lg bg-slate-50 border border-slate-200"
+                    >
+                      <span className="text-xs text-slate-500 font-mono mt-0.5 min-w-[60px]">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </span>
+                      {getLogIcon(log.level)}
+                      <span className="flex-1 leading-relaxed text-slate-700">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

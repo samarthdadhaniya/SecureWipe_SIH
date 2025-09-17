@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Navigation } from "@/components/navigation"
 import { PageHeader } from "@/components/page-header"
 import {
   Search,
@@ -191,185 +190,181 @@ export default function HelpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen w-full max-w-none ml-0">
+      <div className="container px-4 py-8 lg:py-12 max-w-6xl mx-auto">
+        <PageHeader
+          title="Help & Documentation"
+          description="Find answers to common questions and learn how to use SecureWipe Pro effectively."
+        />
 
-      <main className="container px-4 py-8">
-        <div className="mx-auto max-w-6xl">
-          <PageHeader
-            title="Help & Documentation"
-            description="Find answers to common questions and learn how to use SecureWipe Pro effectively."
-          />
-
-          {/* Quick Start Guide */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Quick Start Guide
-              </CardTitle>
-              <CardDescription>Get started with SecureWipe Pro in 5 simple steps.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                {quickStartSteps.map((step) => {
-                  const Icon = step.icon
-                  return (
-                    <div
-                      key={step.step}
-                      className="flex flex-col items-center text-center p-4 rounded-lg border bg-card/50"
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-3">
-                        <Icon className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="text-sm font-medium mb-1">Step {step.step}</div>
-                      <div className="text-sm font-semibold mb-2">{step.title}</div>
-                      <div className="text-xs text-muted-foreground leading-relaxed">{step.description}</div>
+        {/* Quick Start Guide */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Quick Start Guide
+            </CardTitle>
+            <CardDescription>Get started with SecureWipe Pro in 5 simple steps.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+              {quickStartSteps.map((step) => {
+                const Icon = step.icon
+                return (
+                  <div
+                    key={step.step}
+                    className="flex flex-col items-center text-center p-4 rounded-lg border bg-card/50"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-3">
+                      <Icon className="h-6 w-6 text-primary" />
                     </div>
+                    <div className="text-sm font-medium mb-1">Step {step.step}</div>
+                    <div className="text-sm font-semibold mb-2">{step.title}</div>
+                    <div className="text-xs text-muted-foreground leading-relaxed">{step.description}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 lg:grid-cols-4">
+          {/* Categories Sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-lg">Categories</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                    !selectedCategory ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                  }`}
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">All Topics</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    {faqData.length}
+                  </Badge>
+                </button>
+                {categories.map((category) => {
+                  const Icon = category.icon
+                  const count = faqData.filter((faq) => faq.category === category.id).length
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(category.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                        selectedCategory === category.id ? category.color : "hover:bg-muted"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="text-sm font-medium">{category.name}</span>
+                      <Badge variant="secondary" className="ml-auto text-xs">
+                        {count}
+                      </Badge>
+                    </button>
                   )
                 })}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          <div className="grid gap-6 lg:grid-cols-4">
-            {/* Categories Sidebar */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-24">
-                <CardHeader>
-                  <CardTitle className="text-lg">Categories</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <button
-                    onClick={() => setSelectedCategory(null)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                      !selectedCategory ? "bg-primary/10 text-primary" : "hover:bg-muted"
-                    }`}
-                  >
-                    <HelpCircle className="h-4 w-4" />
-                    <span className="text-sm font-medium">All Topics</span>
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      {faqData.length}
-                    </Badge>
-                  </button>
-                  {categories.map((category) => {
-                    const Icon = category.icon
-                    const count = faqData.filter((faq) => faq.category === category.id).length
-                    return (
-                      <button
-                        key={category.id}
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                          selectedCategory === category.id ? category.color : "hover:bg-muted"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span className="text-sm font-medium">{category.name}</span>
-                        <Badge variant="secondary" className="ml-auto text-xs">
-                          {count}
-                        </Badge>
-                      </button>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-            </div>
+          {/* FAQ Content */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Search */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search help topics..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* FAQ Content */}
-            <div className="lg:col-span-3 space-y-6">
-              {/* Search */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search help topics..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
+            {/* Results */}
+            <div className="space-y-4">
+              {filteredFAQs.length === 0 ? (
+                <Card className="border-2 border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <HelpCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No results found</h3>
+                    <p className="text-muted-foreground text-center">
+                      Try adjusting your search terms or browse by category.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      {filteredFAQs.length} {filteredFAQs.length === 1 ? "result" : "results"} found
+                    </p>
+                    {selectedCategory && (
+                      <Badge variant="outline" className="text-xs">
+                        {categories.find((c) => c.id === selectedCategory)?.name}
+                      </Badge>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
 
-              {/* Results */}
-              <div className="space-y-4">
-                {filteredFAQs.length === 0 ? (
-                  <Card className="border-2 border-dashed">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <HelpCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No results found</h3>
-                      <p className="text-muted-foreground text-center">
-                        Try adjusting your search terms or browse by category.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        {filteredFAQs.length} {filteredFAQs.length === 1 ? "result" : "results"} found
-                      </p>
-                      {selectedCategory && (
-                        <Badge variant="outline" className="text-xs">
-                          {categories.find((c) => c.id === selectedCategory)?.name}
-                        </Badge>
-                      )}
-                    </div>
+                  {filteredFAQs.map((faq) => {
+                    const isOpen = openItems.includes(faq.id)
+                    const category = categories.find((c) => c.id === faq.category)
 
-                    {filteredFAQs.map((faq) => {
-                      const isOpen = openItems.includes(faq.id)
-                      const category = categories.find((c) => c.id === faq.category)
-
-                      return (
-                        <Card key={faq.id} className="border-2 hover:border-primary/20 transition-colors">
-                          <Collapsible open={isOpen} onOpenChange={() => toggleItem(faq.id)}>
-                            <CollapsibleTrigger asChild>
-                              <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <CardTitle className="text-lg text-left text-balance">{faq.question}</CardTitle>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      {category && (
-                                        <Badge variant="outline" className="text-xs">
-                                          {category.name}
+                    return (
+                      <Card key={faq.id} className="border-2 hover:border-primary/20 transition-colors">
+                        <Collapsible open={isOpen} onOpenChange={() => toggleItem(faq.id)}>
+                          <CollapsibleTrigger asChild>
+                            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <CardTitle className="text-lg text-left text-balance">{faq.question}</CardTitle>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {category && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {category.name}
+                                      </Badge>
+                                    )}
+                                    <div className="flex flex-wrap gap-1">
+                                      {faq.tags.slice(0, 3).map((tag) => (
+                                        <Badge key={tag} variant="secondary" className="text-xs">
+                                          {tag}
                                         </Badge>
-                                      )}
-                                      <div className="flex flex-wrap gap-1">
-                                        {faq.tags.slice(0, 3).map((tag) => (
-                                          <Badge key={tag} variant="secondary" className="text-xs">
-                                            {tag}
-                                          </Badge>
-                                        ))}
-                                      </div>
+                                      ))}
                                     </div>
                                   </div>
-                                  {isOpen ? (
-                                    <ChevronDown className="h-5 w-5 text-muted-foreground mt-1" />
-                                  ) : (
-                                    <ChevronRight className="h-5 w-5 text-muted-foreground mt-1" />
-                                  )}
                                 </div>
-                              </CardHeader>
-                            </CollapsibleTrigger>
-                            <CollapsibleContent>
-                              <CardContent className="pt-0">
-                                <div className="prose prose-sm max-w-none">
-                                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
-                                </div>
-                              </CardContent>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        </Card>
-                      )
-                    })}
-                  </>
-                )}
-              </div>
+                                {isOpen ? (
+                                  <ChevronDown className="h-5 w-5 text-muted-foreground mt-1" />
+                                ) : (
+                                  <ChevronRight className="h-5 w-5 text-muted-foreground mt-1" />
+                                )}
+                              </div>
+                            </CardHeader>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <CardContent className="pt-0">
+                              <div className="prose prose-sm max-w-none">
+                                <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
+                              </div>
+                            </CardContent>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </Card>
+                    )
+                  })}
+                </>
+              )}
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
